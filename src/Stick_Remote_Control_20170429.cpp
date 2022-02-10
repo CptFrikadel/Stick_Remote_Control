@@ -1,192 +1,176 @@
+#include <Mouse.h>
+#include <Keyboard.h>
+#include <Bounce.h>
+
+
 // remote control for XCSoar, emulates a keyboard and mouse
 // hardware is just pushbuttons connected between pins of an Arduino Leonardo and Gnd
 // for each button press a keystroke or mouse action is sent
-// Button layout Stefly Remote (5 button type) as shown on http://www.openvario.org/doku.php?id=projects:remote_00:top 
+// code is a wild mix of various snippets found on the net mixed up by an software illiterate 
+// I started from http://forum.arduino.cc/index.php?topic=80913.msg1077713#msg1077713 and 
+// modified by copy & paste trial and error. Kudos to Paul for the great starting point! 
+//
+// button layout Stefly Remote as shown on http://www.openvario.org/doku.php?id=projects:remote_00:top 
 // additional Speed to Fly switch between Arduino pin 4 and GND
 
-// uses libraries from
-// https://github.com/r89m/PushButton 
-// https://github.com/r89m/Button
-// https://github.com/thomasfredericks/Bounce2
-
-#include <Mouse.h>
-#include <Keyboard.h>
-#include <Button.h>
-#include <ButtonEventCallback.h>
-#include <PushButton.h>
-#include <Bounce2.h>
-
-// define on which pins the buttons are connected
-
-//        Button_1_pin = N/A   // PTT switch
-const int Button_2_pin = 8;    // upper LH button
-const int Button_3_pin = 9;    // top button
-const int Button_4_pin = 15;   // upper RH button
-const int Button_5_pin = 14;   // lower RH button
-const int Joy_button_pin = 16; // joystick button
-const int Joy_up_pin = 10;
-const int Joy_down_pin = 7;
-const int Joy_left_pin = 2;
-const int Joy_right_pin = 21;
-const int STF_switch_pin = 4;  // STF switch 
-
-// define press (short press) and hold (long press) functions for each button
-// settings in XCSoar default.xci are
-// F1 QuickMenu
-// F2 Analysis
-// F3 Checklist
-// F4 FlarmTraffic
-// F5 GotoLookup (Select Waypoint)
-// F6 Setup Alternates
-// F7 Setup Task
-// F8 Setup Basic (wingload,bugs, QNH)
-// F9
-//    Status all
-//    Calculator (tasks)
-//
-// settings in openvario.xci
-// V for vario mode
-// S for speed to fly mode
-// M for vario menu
-// Q to quit
 
 
-//         Button_1 = N/A                         // PTT switch
-const char Button_2_press_key = KEY_F1;           // F1 for QuickMenu
-const char Button_2_hold_key = 'M';               // M for vario menu
-const char Button_3_press_key = KEY_F3;           // F3 for checklist
-const char Button_3_hold_key = KEY_F2;            // F2 for analysis
-const char Button_4_press_key = KEY_F6;           // F6 for alternates
-const char Button_4_hold_key = KEY_F5;            // F5 for waypoints
-const char Button_5_press_key = KEY_ESC;          // ESC
-const char Button_5_hold_key = 'Q';               // Q to quit XCSoar
-const char Joy_button_press_key = KEY_RETURN;     // Enter
-//         Joy_button_hold_key                    // switches between keyboard and mouse mode
-const char STF_switch_on_key = 'V';               // V for vario mode when switch is on
-const char STF_switch_off_key = 'S';              // S for STF mode when switch is off
+byte buttons[]={9,1,2,14,5,7,3,15,4,6};//seperate array from definitions to set up the pins
+#define NUMBUTTONS sizeof(buttons)//gives size of array *helps for adding buttons
 
-// define timing for buttons etc.
+int debounce_delay = 20;       //Debounce delay in milliseconds
+int mouse_rebounce_interval = 4;
+int keyboard_rebounce_interval = 200;
+int button_pressed = 99;
+long unsigned time_pressed;
+long unsigned time_released;
+boolean Mouse_Active = 0;
 const int Mouse_Move_Distance = 1;
-const int joy_rebounce_interval = 3;
-const int joy_key_rebounce_threshold = 20;
-const int joy_key_first_pressed_threshold = 100;
-const int button_hold_threshold = 500;
-const int joy_hold_threshold = 1;
-//const int debounce_delay = 10;                   //Debounce delay in milliseconds, not used
-
-// define variables
-boolean mouse_active = 0;
-boolean first_pressed = 1;
-int joy_key_counter = 0;
 
 
-// Create instances of PushButtons on digital pins
-PushButton STF_switch = PushButton(STF_switch_pin, ENABLE_INTERNAL_PULLUP);
-PushButton Joy_up = PushButton(Joy_up_pin, ENABLE_INTERNAL_PULLUP);
-PushButton Joy_down = PushButton(Joy_down_pin, ENABLE_INTERNAL_PULLUP);
-PushButton Joy_left = PushButton(Joy_left_pin, ENABLE_INTERNAL_PULLUP);
-PushButton Joy_right = PushButton(Joy_right_pin, ENABLE_INTERNAL_PULLUP);
-PushButton Button_2 = PushButton(Button_2_pin, ENABLE_INTERNAL_PULLUP);
-PushButton Button_3 = PushButton(Button_3_pin, ENABLE_INTERNAL_PULLUP);
-PushButton Button_4 = PushButton(Button_4_pin, ENABLE_INTERNAL_PULLUP);
-PushButton Button_5 = PushButton(Button_5_pin, ENABLE_INTERNAL_PULLUP);
-PushButton Joy_button = PushButton(Joy_button_pin, ENABLE_INTERNAL_PULLUP);
-
-
-void loop() {
-    STF_switch.update();
-    Button_2.update();
-    Button_3.update();
-    Button_4.update();
-    Button_5.update();
-    Joy_button.update();
-    Joy_up.update();
-    Joy_down.update();
-    Joy_left.update();
-    Joy_right.update();
-}
-
-void onButtonReleased(Button &btn) {
-    if (btn.is(Button_2)) Keyboard.press(Button_2_press_key);
-    if (btn.is(Button_3)) Keyboard.press(Button_3_press_key);
-    if (btn.is(Button_4)) Keyboard.press(Button_4_press_key);
-    if (btn.is(Button_5)) Keyboard.press(Button_5_press_key);
-    if (btn.is(Joy_button))
-        if (mouse_active) Mouse.click(MOUSE_LEFT);
-        else Keyboard.press(Joy_button_press_key);
-    Keyboard.releaseAll();
-}
-
-void onButtonHeld(Button &btn) {
-    if (btn.is(Button_2)) Keyboard.press(Button_2_hold_key);
-    if (btn.is(Button_3)) Keyboard.press(Button_3_hold_key);
-    if (btn.is(Button_4)) Keyboard.press(Button_4_hold_key);
-    if (btn.is(Button_5)) Keyboard.press(Button_5_hold_key);
-    if (btn.is(Joy_button)) mouse_active = !mouse_active;
-    Keyboard.releaseAll();
-}
-
-void onJoy(Button &btn) {
-    if (mouse_active && btn.isPressed()) {
-        if (btn.is(Joy_up)) Mouse.move(0, -Mouse_Move_Distance);
-        if (btn.is(Joy_down)) Mouse.move(0, Mouse_Move_Distance);
-        if (btn.is(Joy_left)) Mouse.move(-Mouse_Move_Distance, 0);
-        if (btn.is(Joy_right)) Mouse.move(Mouse_Move_Distance, 0);
-    }
-    if (!mouse_active && btn.isPressed() && joy_key_counter == 5) {
-        if (btn.is(Joy_up)) Keyboard.press(KEY_UP_ARROW);
-        if (btn.is(Joy_down)) Keyboard.press(KEY_DOWN_ARROW);
-        if (btn.is(Joy_left)) Keyboard.press(KEY_LEFT_ARROW);
-        if (btn.is(Joy_right)) Keyboard.press(KEY_RIGHT_ARROW);
-        Keyboard.releaseAll();
-    }
-    joy_key_counter = joy_key_counter + 1;
-    if (first_pressed && joy_key_counter > joy_key_first_pressed_threshold) {
-        joy_key_counter = 0;
-        first_pressed = 0;
-    }
-    if (!first_pressed && joy_key_counter > joy_key_rebounce_threshold)joy_key_counter = 0;
-}
-
-void onJoyRelease(Button &btn) {
-    joy_key_counter = 0;
-    first_pressed = 1;
-}
-
-void onSTF_switch(Button &btn) {
-    if (STF_switch.isPressed()) Keyboard.press(STF_switch_on_key);
-    else
-        Keyboard.press(STF_switch_off_key);
-    Keyboard.releaseAll();
-}
+// I really dont see getting around doing this manually
+Bounce bouncer[] = { //would guess thats what the fuss is about
+        Bounce(9,debounce_delay),   // Button 0 = top button (Mode)
+        Bounce(1,debounce_delay),  // Button 1 = upper RH button (ALT)
+        Bounce(2,debounce_delay),  // Button 2 = joystick up
+        Bounce(14,debounce_delay),   // Button 3 = upper LH button (QM)
+        Bounce(5,debounce_delay),   // Button 4 = joystick left
+        Bounce(7,debounce_delay),   // Button 5 = STF switch
+        Bounce(3,debounce_delay),  // Button 6 = joystick right
+        Bounce(15,debounce_delay),  // Button 7 = lower RH button (ESC)
+        Bounce(4,debounce_delay),   // Button 8 = joystick down
+        Bounce(6,debounce_delay),  // Button 9 = joystick press
+};
 
 void setup() {
-    STF_switch.onPress(onSTF_switch);
-    STF_switch.onRelease(onSTF_switch);
+    for (byte set=0;set<=NUMBUTTONS;set++){//sets the button pins
+        pinMode(buttons[set],INPUT);
+        digitalWrite(buttons[set],HIGH);//<-comment out this line if not using internal pull ups
+    }//-----------------------------------and change read()==to high if your set up requires
+    // pinMode(LED,OUTPUT);//------------------otherwise event will occure on release
 
-    Joy_up.onRelease(onJoyRelease);
-    Joy_down.onRelease(onJoyRelease);
-    Joy_left.onRelease(onJoyRelease);
-    Joy_right.onRelease(onJoyRelease);
-
-    Joy_up.onHoldRepeat(joy_hold_threshold, joy_rebounce_interval, onJoy);
-    Joy_down.onHoldRepeat(joy_hold_threshold, joy_rebounce_interval, onJoy);
-    Joy_left.onHoldRepeat(joy_hold_threshold, joy_rebounce_interval, onJoy);
-    Joy_right.onHoldRepeat(joy_hold_threshold, joy_rebounce_interval, onJoy);
-
-    Button_2.onRelease(0, button_hold_threshold - 1, onButtonReleased);
-    Button_3.onRelease(0, button_hold_threshold - 1, onButtonReleased);
-    Button_4.onRelease(0, button_hold_threshold - 1, onButtonReleased);
-    Button_5.onRelease(0, button_hold_threshold - 1, onButtonReleased);
-    Joy_button.onRelease(0, button_hold_threshold - 1, onButtonReleased);
-
-    Button_2.onHold(button_hold_threshold, onButtonHeld);
-    Button_3.onHold(button_hold_threshold, onButtonHeld);
-    Button_4.onHold(button_hold_threshold, onButtonHeld);
-    Button_5.onHold(button_hold_threshold, onButtonHeld);
-    Joy_button.onHold(button_hold_threshold, onButtonHeld);
-
+// Wait five seconds since the HID drivers need a bit of time to re-mount after upload.
+    delay(1000);
     Keyboard.begin();
     Mouse.begin();
-    joy_key_counter = 0;
+//  Serial.begin(57600);
+//  Serial.println("Pushbutton Bounce library test:");
+}
+
+void loop() {
+
+    while (button_pressed == 99) {
+        for(int num=0;num<NUMBUTTONS;num++){
+            if ( bouncer[num].update()) {
+                if ( bouncer[num].fallingEdge()) {
+                    button_pressed = num;    //button_pressed=0-10 when button is pressed
+//       Serial.println("Button Pressed");
+//       Serial.println(button_pressed);
+                    break;}
+                if ( bouncer[num].risingEdge()) {
+                    button_pressed = num+50; //button_pressed=50-60 when button is released
+//       Serial.println("Button Pressed");
+//       Serial.println(button_pressed);
+                    break;}
+            }
+        }
+    }
+
+    if (Mouse_Active) {
+        if (button_pressed == 0) Mouse_Active = 0;
+        if (button_pressed == 1) Keyboard.press(KEY_F5);
+        if (button_pressed == 2){
+            while (bouncer[2].read() == 0) {
+                Mouse.move(0, -Mouse_Move_Distance);
+                delay(mouse_rebounce_interval);
+                bouncer[2].update();}}
+        //Serial.println("Bouncer Read");
+        //Serial.println(bouncer[2].read());
+        if (button_pressed == 3) time_pressed = millis();
+        if (button_pressed == 53) {
+            time_released = millis();
+            if (((time_released - time_pressed) < 500)) Keyboard.press(KEY_F1);
+            else Keyboard.press('M');
+        }
+        if (button_pressed == 4) {
+            while (bouncer[4].read() == 0) {
+                Mouse.move(-Mouse_Move_Distance, 0);
+                delay(mouse_rebounce_interval);
+                bouncer[4].update();}}
+        if (button_pressed == 5) {
+            time_pressed = millis();
+        }
+        if (button_pressed == 55) {
+            time_released = millis();
+            if (((time_released - time_pressed) < 300)) Keyboard.press('V');
+            else Keyboard.press('S');
+        }
+        if (button_pressed == 6) {
+            while (bouncer[6].read() == 0) {
+                Mouse.move(Mouse_Move_Distance, 0);
+                delay(mouse_rebounce_interval);
+                bouncer[6].update();}}
+        if (button_pressed == 7) {
+            Keyboard.press(KEY_ESC);
+            Keyboard.releaseAll();
+            Keyboard.press(KEY_ESC);}
+        if (button_pressed == 8) {
+            while (bouncer[8].read() == 0) {
+                Mouse.move(0, Mouse_Move_Distance);
+                delay(mouse_rebounce_interval);
+                bouncer[8].update();}}
+        if (button_pressed == 9) Mouse.click(MOUSE_LEFT);
+    }
+    else {
+        if (button_pressed == 0) Mouse_Active = 1;
+        if (button_pressed == 1) Keyboard.press(KEY_F5);
+        if (button_pressed == 2) {
+            while (bouncer[2].read() == 0) {
+                Keyboard.press(KEY_UP_ARROW);
+                Keyboard.releaseAll();
+                delay(keyboard_rebounce_interval);
+                bouncer[2].update();}}
+        if (button_pressed == 3) {
+            time_pressed = millis();
+        }
+        if (button_pressed == 53) {
+            time_released = millis();
+            if (((time_released - time_pressed) < 500)) Keyboard.press(KEY_F1);
+            else Keyboard.press('M');
+        }
+        if (button_pressed == 4) {
+            while (bouncer[4].read() == 0) {
+                Keyboard.press(KEY_LEFT_ARROW);
+                Keyboard.releaseAll();
+                delay(keyboard_rebounce_interval);
+                bouncer[4].update();}}
+        if (button_pressed == 5) {
+            time_pressed = millis();
+        }
+        if (button_pressed == 55) {
+            time_released = millis();
+            if (((time_released - time_pressed) < 300)) Keyboard.press('V');
+            else Keyboard.press('S');
+        }
+        if (button_pressed == 6) {
+            while (bouncer[6].read() == 0) {
+                Keyboard.press(KEY_RIGHT_ARROW);
+                Keyboard.releaseAll();
+                delay(keyboard_rebounce_interval);
+                bouncer[6].update();}}
+        if (button_pressed == 7) {
+            Keyboard.press(KEY_ESC);
+            Keyboard.releaseAll();
+            Keyboard.press(KEY_ESC);}
+        if (button_pressed == 8) {
+            while (bouncer[8].read() == 0) {
+                Keyboard.press(KEY_DOWN_ARROW);
+                Keyboard.releaseAll();
+                delay(keyboard_rebounce_interval);
+                bouncer[8].update();}}
+        if (button_pressed == 9) Keyboard.press(KEY_RETURN);
+    }
+
+    Keyboard.releaseAll();
+    button_pressed = 99;
 }
