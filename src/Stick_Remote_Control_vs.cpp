@@ -6,11 +6,11 @@
 // remote control for XCSoar, emulates a keyboard and mouse
 // hardware is just pushbuttons connected between pins of an Arduino Leonardo and Gnd
 // for each button press a keystroke or mouse action is sent
-// code is a wild mix of various snippets found on the net mixed up by an software illiterate 
-// I started from http://forum.arduino.cc/index.php?topic=80913.msg1077713#msg1077713 and 
-// modified by copy & paste trial and error. Kudos to Paul for the great starting point! 
+// code is a wild mix of various snippets found on the net mixed up by an software illiterate
+// I started from http://forum.arduino.cc/index.php?topic=80913.msg1077713#msg1077713 and
+// modified by copy & paste trial and error. Kudos to Paul for the great starting point!
 //
-// button layout Stefly Remote as shown on http://www.openvario.org/doku.php?id=projects:remote_00:top 
+// button layout Stefly Remote as shown on http://www.openvario.org/doku.php?id=projects:remote_00:top
 // additional Speed to Fly switch between Arduino pin 4 and GND
 
 
@@ -26,6 +26,7 @@ long unsigned time_pressed;
 long unsigned time_released;
 bool Mouse_Active = false;
 const int Mouse_Move_Distance = 1;
+bool button5_armed = false;
 
 // I really dont see getting around doing this manually
 Bounce bouncer[] = { //would guess thats what the fuss is about
@@ -57,6 +58,11 @@ void setup() {
 void loop() {
 
     while (button_pressed == 99) {
+        if (button5_armed && millis() - time_pressed > 600) {
+            Keyboard.press('S');
+            Keyboard.releaseAll();
+            button5_armed = false;
+        }
         for (byte num = 0; num < NUMBUTTONS; num++) {
             if (bouncer[num].update()) {
                 if (bouncer[num].fallingEdge()) {
@@ -106,13 +112,13 @@ void loop() {
                 break;
             case 5:
                 time_pressed = millis();
+                button5_armed = true;
                 break;
             case 55:
                 time_released = millis();
+                button5_armed = false;
                 if (time_released - time_pressed < 300) {
                     Keyboard.press('V');
-                } else {
-                    Keyboard.press('S');
                 }
                 break;
             case 6:
@@ -175,13 +181,13 @@ void loop() {
                 break;
             case 5:
                 time_pressed = millis();
+                button5_armed = true;
                 break;
             case 55:
                 time_released = millis();
-                if ((time_released - time_pressed < 300)) {
+                button5_armed = false;
+                if (time_released - time_pressed < 300) {
                     Keyboard.press('V');
-                } else {
-                    Keyboard.press('S');
                 }
                 break;
             case 6:
