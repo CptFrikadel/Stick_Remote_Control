@@ -79,115 +79,134 @@ void loop() {
     }
 
     if (Mouse_Active) {
-        if (button_pressed == 0) Mouse_Active = 0;
-        if (button_pressed == 1) Keyboard.press(KEY_F5);
-        if (button_pressed == 2) {
-            while (bouncer[2].read() == 0) {
-                Mouse.move(0, -Mouse_Move_Distance);
-                delay(mouse_rebounce_interval);
-                bouncer[2].update();
-            }
+        switch (button_pressed) {
+            case 0:
+                Mouse_Active = 0;
+                break;
+            case 1:
+                Keyboard.press(KEY_F5);
+                break;
+            case 2:
+                while (bouncer[2].read() == 0) {
+                    Mouse.move(0, -Mouse_Move_Distance);
+                    delay(mouse_rebounce_interval);
+                    bouncer[2].update();
+                }
+                break;
+                //Serial.println("Bouncer Read");
+                //Serial.println(bouncer[2].read());
+            case 3:
+                time_pressed = millis();
+                break;
+            case 53:
+                time_released = millis();
+                if (((time_released - time_pressed) < 500)) Keyboard.press(KEY_F1);
+                else Keyboard.press('M');
+                break;
+            case 4:
+                while (bouncer[4].read() == 0) {
+                    Mouse.move(-Mouse_Move_Distance, 0);
+                    delay(mouse_rebounce_interval);
+                    bouncer[4].update();
+                }
+                break;
+            case 5:
+                time_pressed = millis();
+                break;
+            case 55:
+                time_released = millis();
+                if (((time_released - time_pressed) < 300)) Keyboard.press('V');
+                else Keyboard.press('S');
+                break;
+            case 6:
+                while (bouncer[6].read() == 0) {
+                    Mouse.move(Mouse_Move_Distance, 0);
+                    delay(mouse_rebounce_interval);
+                    bouncer[6].update();
+                }
+                break;
+            case 7:
+                Keyboard.press(KEY_ESC);
+                Keyboard.releaseAll();
+                Keyboard.press(KEY_ESC);
+                break;
+            case 8:
+                while (bouncer[8].read() == 0) {
+                    Mouse.move(0, Mouse_Move_Distance);
+                    delay(mouse_rebounce_interval);
+                    bouncer[8].update();
+                }
+                break;
+            case 9:
+                Mouse.click(MOUSE_LEFT);
+                break;
         }
-        //Serial.println("Bouncer Read");
-        //Serial.println(bouncer[2].read());
-        if (button_pressed == 3) time_pressed = millis();
-        if (button_pressed == 53) {
-            time_released = millis();
-            if (((time_released - time_pressed) < 500)) Keyboard.press(KEY_F1);
-            else Keyboard.press('M');
-        }
-        if (button_pressed == 4) {
-            while (bouncer[4].read() == 0) {
-                Mouse.move(-Mouse_Move_Distance, 0);
-                delay(mouse_rebounce_interval);
-                bouncer[4].update();
-            }
-        }
-        if (button_pressed == 5) {
-            time_pressed = millis();
-        }
-        if (button_pressed == 55) {
-            time_released = millis();
-            if (((time_released - time_pressed) < 300)) Keyboard.press('V');
-            else Keyboard.press('S');
-        }
-        if (button_pressed == 6) {
-            while (bouncer[6].read() == 0) {
-                Mouse.move(Mouse_Move_Distance, 0);
-                delay(mouse_rebounce_interval);
-                bouncer[6].update();
-            }
-        }
-        if (button_pressed == 7) {
-            Keyboard.press(KEY_ESC);
-            Keyboard.releaseAll();
-            Keyboard.press(KEY_ESC);
-        }
-        if (button_pressed == 8) {
-            while (bouncer[8].read() == 0) {
-                Mouse.move(0, Mouse_Move_Distance);
-                delay(mouse_rebounce_interval);
-                bouncer[8].update();
-            }
-        }
-        if (button_pressed == 9) Mouse.click(MOUSE_LEFT);
     } else {
-        if (button_pressed == 0) Mouse_Active = 1;
-        if (button_pressed == 1) Keyboard.press(KEY_F5);
-        if (button_pressed == 2) {
-            while (bouncer[2].read() == 0) {
-                Keyboard.press(KEY_UP_ARROW);
+        switch (button_pressed) {
+            case 0:
+                Mouse_Active = 1;
+                break;
+            case 1:
+                Keyboard.press(KEY_F5);
+                break;
+            case 2:
+                while (bouncer[2].read() == 0) {
+                    Keyboard.press(KEY_UP_ARROW);
+                    Keyboard.releaseAll();
+                    delay(keyboard_rebounce_interval);
+                    bouncer[2].update();
+                }
+                break;
+            case 3:
+                time_pressed = millis();
+                break;
+            case 53:
+                time_released = millis();
+                if (((time_released - time_pressed) < 500)) Keyboard.press(KEY_F1);
+                else Keyboard.press('M');
+                break;
+            case 4:
+                while (bouncer[4].read() == 0) {
+                    Keyboard.press(KEY_LEFT_ARROW);
+                    Keyboard.releaseAll();
+                    delay(keyboard_rebounce_interval);
+                    bouncer[4].update();
+                }
+                break;
+            case 5:
+                time_pressed = millis();
+                break;
+
+            case 55:
+                time_released = millis();
+                if (((time_released - time_pressed) < 300)) Keyboard.press('V');
+                else Keyboard.press('S');
+                break;
+            case 6:
+                while (bouncer[6].read() == 0) {
+                    Keyboard.press(KEY_RIGHT_ARROW);
+                    Keyboard.releaseAll();
+                    delay(keyboard_rebounce_interval);
+                    bouncer[6].update();
+                }
+                break;
+            case 7:
+                Keyboard.press(KEY_ESC);
                 Keyboard.releaseAll();
-                delay(keyboard_rebounce_interval);
-                bouncer[2].update();
-            }
+                Keyboard.press(KEY_ESC);
+                break;
+            case 8:
+                while (bouncer[8].read() == 0) {
+                    Keyboard.press(KEY_DOWN_ARROW);
+                    Keyboard.releaseAll();
+                    delay(keyboard_rebounce_interval);
+                    bouncer[8].update();
+                }
+                break;
+            case 9:
+                Keyboard.press(KEY_RETURN);
+                break;
         }
-        if (button_pressed == 3) {
-            time_pressed = millis();
-        }
-        if (button_pressed == 53) {
-            time_released = millis();
-            if (((time_released - time_pressed) < 500)) Keyboard.press(KEY_F1);
-            else Keyboard.press('M');
-        }
-        if (button_pressed == 4) {
-            while (bouncer[4].read() == 0) {
-                Keyboard.press(KEY_LEFT_ARROW);
-                Keyboard.releaseAll();
-                delay(keyboard_rebounce_interval);
-                bouncer[4].update();
-            }
-        }
-        if (button_pressed == 5) {
-            time_pressed = millis();
-        }
-        if (button_pressed == 55) {
-            time_released = millis();
-            if (((time_released - time_pressed) < 300)) Keyboard.press('V');
-            else Keyboard.press('S');
-        }
-        if (button_pressed == 6) {
-            while (bouncer[6].read() == 0) {
-                Keyboard.press(KEY_RIGHT_ARROW);
-                Keyboard.releaseAll();
-                delay(keyboard_rebounce_interval);
-                bouncer[6].update();
-            }
-        }
-        if (button_pressed == 7) {
-            Keyboard.press(KEY_ESC);
-            Keyboard.releaseAll();
-            Keyboard.press(KEY_ESC);
-        }
-        if (button_pressed == 8) {
-            while (bouncer[8].read() == 0) {
-                Keyboard.press(KEY_DOWN_ARROW);
-                Keyboard.releaseAll();
-                delay(keyboard_rebounce_interval);
-                bouncer[8].update();
-            }
-        }
-        if (button_pressed == 9) Keyboard.press(KEY_RETURN);
     }
 
     Keyboard.releaseAll();
