@@ -4,9 +4,9 @@
 
 
 // remote control for XCSoar, emulates a keyboard and mouse
-// hardware is just pushbuttons connected between pins of an Arduino Leonardo and Gnd
+// hardware is just push buttons connected between pins of an Arduino Leonardo and Gnd
 // for each button press a keystroke or mouse action is sent
-// code is a wild mix of various snippets found on the net mixed up by an software illiterate
+// code is a wild mix of various snippets found on the net mixed up by a software illiterate
 // I started from http://forum.arduino.cc/index.php?topic=80913.msg1077713#msg1077713 and
 // modified by copy & paste trial and error. Kudos to Paul for the great starting point!
 //
@@ -15,21 +15,21 @@
 
 
 
-byte buttons[] = {9, 1, 2, 14, 5, 7, 3, 15, 4, 6};//seperate array from definitions to set up the pins
+byte buttons[] = {9, 1, 2, 14, 5, 7, 3, 15, 4, 6};//separate array from definitions to set up the pins
 #define NUMBUTTONS sizeof(buttons)//gives size of array *helps for adding buttons
 
 int debounce_delay = 20;       //Debounce delay in milliseconds
 int mouse_rebounce_interval = 4;
 int keyboard_rebounce_interval = 200;
-int button_pressed = 99;
+unsigned button_pressed = 99;
 long unsigned time_pressed;
 long unsigned time_released;
 bool Mouse_Active = false;
 const int Mouse_Move_Distance = 1;
 bool button5_armed = false;
 
-// I really dont see getting around doing this manually
-Bounce bouncer[] = { //would guess thats what the fuss is about
+// I really don't see getting around doing this manually
+Bounce bouncer[] = { //would guess that's what the fuss is about
         Bounce(9, debounce_delay),   // Button 0 = top button (Mode)
         Bounce(1, debounce_delay),  // Button 1 = upper RH button (ALT)
         Bounce(2, debounce_delay),  // Button 2 = joystick up
@@ -43,11 +43,11 @@ Bounce bouncer[] = { //would guess thats what the fuss is about
 };
 
 void setup() {
-    for (byte set = 0; set <= NUMBUTTONS; set++) {//sets the button pins
+    for (unsigned set = 0; set <= NUMBUTTONS; set++) {//sets the button pins
         pinMode(buttons[set], INPUT);
-        digitalWrite(buttons[set], HIGH);//<-comment out this line if not using internal pull ups
+        digitalWrite(buttons[set], HIGH);//<-comment out this line if not using internal pull-ups
     }//-----------------------------------and change read()==to high if your set up requires
-    // pinMode(LED,OUTPUT);//------------------otherwise event will occure on release
+    // pinMode(LED,OUTPUT);//------------------otherwise event will occur on release
 
 // Wait five seconds since the HID drivers need a bit of time to re-mount after upload.
     delay(1000);
@@ -63,7 +63,7 @@ void loop() {
             Keyboard.releaseAll();
             button5_armed = false;
         }
-        for (byte num = 0; num < NUMBUTTONS; num++) {
+        for (unsigned num = 0; num < NUMBUTTONS; num++) {
             if (bouncer[num].update()) {
                 if (bouncer[num].fallingEdge()) {
                     button_pressed = num;    //button_pressed=0-10 when button is pressed
@@ -143,6 +143,8 @@ void loop() {
             case 9:
                 Mouse.click(MOUSE_LEFT);
                 break;
+            default:
+                break;
         }
     } else {
         switch (button_pressed) {
@@ -213,6 +215,8 @@ void loop() {
                 break;
             case 9:
                 Keyboard.press(KEY_RETURN);
+                break;
+            default:
                 break;
         }
     }
