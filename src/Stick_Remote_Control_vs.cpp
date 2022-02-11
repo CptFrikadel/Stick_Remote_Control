@@ -24,9 +24,8 @@ int keyboard_rebounce_interval = 200;
 int button_pressed = 99;
 long unsigned time_pressed;
 long unsigned time_released;
-boolean Mouse_Active = 0;
+bool Mouse_Active = false;
 const int Mouse_Move_Distance = 1;
-
 
 // I really dont see getting around doing this manually
 Bounce bouncer[] = { //would guess thats what the fuss is about
@@ -75,7 +74,7 @@ void loop() {
     if (Mouse_Active) {
         switch (button_pressed) {
             case 0:
-                Mouse_Active = 0;
+                Mouse_Active = false;
                 break;
             case 1:
                 Keyboard.press(KEY_F5);
@@ -92,8 +91,11 @@ void loop() {
                 break;
             case 53:
                 time_released = millis();
-                if (((time_released - time_pressed) < 500)) Keyboard.press(KEY_F1);
-                else Keyboard.press('M');
+                if (time_released - time_pressed < 500) {
+                    Keyboard.press(KEY_F1);
+                } else {
+                    Keyboard.press('M');
+                }
                 break;
             case 4:
                 while (bouncer[4].read() == 0) {
@@ -107,8 +109,11 @@ void loop() {
                 break;
             case 55:
                 time_released = millis();
-                if (((time_released - time_pressed) < 300)) Keyboard.press('V');
-                else Keyboard.press('S');
+                if (time_released - time_pressed < 300) {
+                    Keyboard.press('V');
+                } else {
+                    Keyboard.press('S');
+                }
                 break;
             case 6:
                 while (bouncer[6].read() == 0) {
@@ -136,7 +141,7 @@ void loop() {
     } else {
         switch (button_pressed) {
             case 0:
-                Mouse_Active = 1;
+                Mouse_Active = true;
                 break;
             case 1:
                 Keyboard.press(KEY_F5);
@@ -154,8 +159,11 @@ void loop() {
                 break;
             case 53:
                 time_released = millis();
-                if (((time_released - time_pressed) < 500)) Keyboard.press(KEY_F1);
-                else Keyboard.press('M');
+                if (time_released - time_pressed < 500) {
+                    Keyboard.press(KEY_F1);
+                } else {
+                    Keyboard.press('M');
+                }
                 break;
             case 4:
                 while (bouncer[4].read() == 0) {
@@ -168,11 +176,13 @@ void loop() {
             case 5:
                 time_pressed = millis();
                 break;
-
             case 55:
                 time_released = millis();
-                if (((time_released - time_pressed) < 300)) Keyboard.press('V');
-                else Keyboard.press('S');
+                if ((time_released - time_pressed < 300)) {
+                    Keyboard.press('V');
+                } else {
+                    Keyboard.press('S');
+                }
                 break;
             case 6:
                 while (bouncer[6].read() == 0) {
