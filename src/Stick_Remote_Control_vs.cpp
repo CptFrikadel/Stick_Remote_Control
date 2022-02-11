@@ -53,8 +53,6 @@ void setup() {
     delay(1000);
     Keyboard.begin();
     Mouse.begin();
-//  Serial.begin(57600);
-//  Serial.println("Pushbutton Bounce library test:");
 }
 
 void loop() {
@@ -64,14 +62,10 @@ void loop() {
             if (bouncer[num].update()) {
                 if (bouncer[num].fallingEdge()) {
                     button_pressed = num;    //button_pressed=0-10 when button is pressed
-//       Serial.println("Button Pressed");
-//       Serial.println(button_pressed);
                     break;
                 }
                 if (bouncer[num].risingEdge()) {
                     button_pressed = num + 50; //button_pressed=50-60 when button is released
-//       Serial.println("Button Pressed");
-//       Serial.println(button_pressed);
                     break;
                 }
             }
@@ -93,8 +87,6 @@ void loop() {
                     bouncer[2].update();
                 }
                 break;
-                //Serial.println("Bouncer Read");
-                //Serial.println(bouncer[2].read());
             case 3:
                 time_pressed = millis();
                 break;
