@@ -2,7 +2,6 @@
 #include <Keyboard.h>
 #include <Bounce.h>
 
-
 // remote control for XCSoar, emulates a keyboard and mouse
 // hardware is just push buttons connected between pins of an Arduino Leonardo and Gnd
 // for each button press a keystroke or mouse action is sent
@@ -13,34 +12,31 @@
 // button layout Stefly Remote as shown on http://www.openvario.org/doku.php?id=projects:remote_00:top
 // additional Speed to Fly switch between Arduino pin 4 and GND
 
-
-
-uint8_t buttons[] = {9, 1, 2, 14, 5, 7, 3, 15, 4, 6};//separate array from definitions to set up the pins
-#define NUMBUTTONS sizeof(buttons)//gives size of array *helps for adding buttons
-
-#define DEBOUNCE_DELAY 20       //Debounce delay in milliseconds
+uint8_t buttons[] = {9, 1, 2, 14, 5, 7, 3, 15, 4, 6}; //separate array from definitions to set up the pins
+#define NUMBUTTONS sizeof(buttons)  //gives size of array *helps for adding buttons
+#define DEBOUNCE_DELAY 20           //Debounce delay in milliseconds
 #define MOUSE_REBOUNCE_INTERVAL 4
 #define KEYBOARD_REBOUNCE_INTERVAL 200
 #define MOUSE_MOVE_DISTANCE  1
 
 // I really don't see getting around doing this manually
 Bounce bouncer[] = { //would guess that's what the fuss is about
-        Bounce(9, DEBOUNCE_DELAY),   // Button 0 = top button (Mode)
-        Bounce(1, DEBOUNCE_DELAY),  // Button 1 = upper RH button (ALT)
-        Bounce(2, DEBOUNCE_DELAY),  // Button 2 = joystick up
+        Bounce(9, DEBOUNCE_DELAY),    // Button 0 = top button (Mode)
+        Bounce(1, DEBOUNCE_DELAY),    // Button 1 = upper RH button (ALT)
+        Bounce(2, DEBOUNCE_DELAY),    // Button 2 = joystick up
         Bounce(14, DEBOUNCE_DELAY),   // Button 3 = upper LH button (QM)
-        Bounce(5, DEBOUNCE_DELAY),   // Button 4 = joystick left
-        Bounce(7, DEBOUNCE_DELAY),   // Button 5 = STF switch
-        Bounce(3, DEBOUNCE_DELAY),  // Button 6 = joystick right
-        Bounce(15, DEBOUNCE_DELAY),  // Button 7 = lower RH button (ESC)
-        Bounce(4, DEBOUNCE_DELAY),   // Button 8 = joystick down
-        Bounce(6, DEBOUNCE_DELAY),  // Button 9 = joystick press
+        Bounce(5, DEBOUNCE_DELAY),    // Button 4 = joystick left
+        Bounce(7, DEBOUNCE_DELAY),    // Button 5 = STF switch
+        Bounce(3, DEBOUNCE_DELAY),    // Button 6 = joystick right
+        Bounce(15, DEBOUNCE_DELAY),   // Button 7 = lower RH button (ESC)
+        Bounce(4, DEBOUNCE_DELAY),    // Button 8 = joystick down
+        Bounce(6, DEBOUNCE_DELAY),    // Button 9 = joystick press
 };
 
 void setup() {
-    for (unsigned set = 0; set < NUMBUTTONS; set++) {//sets the button pins
+    for (unsigned set = 0; set < NUMBUTTONS; set++) { //sets the button pins
         pinMode(buttons[set], INPUT);
-        digitalWrite(buttons[set], HIGH);//<-comment out this line if not using internal pull-ups
+        digitalWrite(buttons[set], HIGH);  //<-comment out this line if not using internal pull-ups
     }//-----------------------------------and change read()==to high if your set up requires
     // pinMode(LED,OUTPUT);//------------------otherwise event will occur on release
 
@@ -219,6 +215,5 @@ void loop() {
                 break;
         }
     }
-
     Keyboard.releaseAll();
 }
