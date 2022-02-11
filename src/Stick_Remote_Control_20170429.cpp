@@ -60,7 +60,7 @@ void setup() {
 void loop() {
 
     while (button_pressed == 99) {
-        for(int num=0;num<NUMBUTTONS;num++){
+        for(byte num=0;num<NUMBUTTONS;num++){
             if ( bouncer[num].update()) {
                 if ( bouncer[num].fallingEdge()) {
                     button_pressed = num;    //button_pressed=0-10 when button is pressed
