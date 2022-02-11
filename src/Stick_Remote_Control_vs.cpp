@@ -15,35 +15,30 @@
 
 
 
-byte buttons[] = {9, 1, 2, 14, 5, 7, 3, 15, 4, 6};//separate array from definitions to set up the pins
+uint8_t buttons[] = {9, 1, 2, 14, 5, 7, 3, 15, 4, 6};//separate array from definitions to set up the pins
 #define NUMBUTTONS sizeof(buttons)//gives size of array *helps for adding buttons
 
-int debounce_delay = 20;       //Debounce delay in milliseconds
-int mouse_rebounce_interval = 4;
-int keyboard_rebounce_interval = 200;
-unsigned button_pressed = 99;
-long unsigned time_pressed;
-long unsigned time_released;
-bool Mouse_Active = false;
-const int Mouse_Move_Distance = 1;
-bool button5_armed = false;
+#define DEBOUNCE_DELAY 20       //Debounce delay in milliseconds
+#define MOUSE_REBOUNCE_INTERVAL 4
+#define KEYBOARD_REBOUNCE_INTERVAL 200
+#define MOUSE_MOVE_DISTANCE  1
 
 // I really don't see getting around doing this manually
 Bounce bouncer[] = { //would guess that's what the fuss is about
-        Bounce(9, debounce_delay),   // Button 0 = top button (Mode)
-        Bounce(1, debounce_delay),  // Button 1 = upper RH button (ALT)
-        Bounce(2, debounce_delay),  // Button 2 = joystick up
-        Bounce(14, debounce_delay),   // Button 3 = upper LH button (QM)
-        Bounce(5, debounce_delay),   // Button 4 = joystick left
-        Bounce(7, debounce_delay),   // Button 5 = STF switch
-        Bounce(3, debounce_delay),  // Button 6 = joystick right
-        Bounce(15, debounce_delay),  // Button 7 = lower RH button (ESC)
-        Bounce(4, debounce_delay),   // Button 8 = joystick down
-        Bounce(6, debounce_delay),  // Button 9 = joystick press
+        Bounce(9, DEBOUNCE_DELAY),   // Button 0 = top button (Mode)
+        Bounce(1, DEBOUNCE_DELAY),  // Button 1 = upper RH button (ALT)
+        Bounce(2, DEBOUNCE_DELAY),  // Button 2 = joystick up
+        Bounce(14, DEBOUNCE_DELAY),   // Button 3 = upper LH button (QM)
+        Bounce(5, DEBOUNCE_DELAY),   // Button 4 = joystick left
+        Bounce(7, DEBOUNCE_DELAY),   // Button 5 = STF switch
+        Bounce(3, DEBOUNCE_DELAY),  // Button 6 = joystick right
+        Bounce(15, DEBOUNCE_DELAY),  // Button 7 = lower RH button (ESC)
+        Bounce(4, DEBOUNCE_DELAY),   // Button 8 = joystick down
+        Bounce(6, DEBOUNCE_DELAY),  // Button 9 = joystick press
 };
 
 void setup() {
-    for (unsigned set = 0; set <= NUMBUTTONS; set++) {//sets the button pins
+    for (unsigned set = 0; set < NUMBUTTONS; set++) {//sets the button pins
         pinMode(buttons[set], INPUT);
         digitalWrite(buttons[set], HIGH);//<-comment out this line if not using internal pull-ups
     }//-----------------------------------and change read()==to high if your set up requires
@@ -55,13 +50,20 @@ void setup() {
     Mouse.begin();
 }
 
+unsigned button_pressed;
+long unsigned time_pressed;
+long unsigned time_released;
+bool mouse_active = false;
+
 void loop() {
+    unsigned last_button_pressed = button_pressed;
+    button_pressed = 99;
 
     while (button_pressed == 99) {
-        if (button5_armed && millis() - time_pressed > 600) {
+        if (last_button_pressed == 5 && millis() - time_pressed > 600) {
             Keyboard.press('S');
             Keyboard.releaseAll();
-            button5_armed = false;
+            last_button_pressed = button_pressed;
         }
         for (unsigned num = 0; num < NUMBUTTONS; num++) {
             if (bouncer[num].update()) {
@@ -77,24 +79,25 @@ void loop() {
         }
     }
 
-    if (Mouse_Active) {
+    if (mouse_active) {
         switch (button_pressed) {
             case 0:
-                Mouse_Active = false;
+                mouse_active = false;
                 break;
             case 1:
                 Keyboard.press(KEY_F5);
                 break;
             case 2:
                 while (bouncer[2].read() == 0) {
-                    Mouse.move(0, -Mouse_Move_Distance);
-                    delay(mouse_rebounce_interval);
+                    Mouse.move(0, -MOUSE_MOVE_DISTANCE);
+                    delay(MOUSE_REBOUNCE_INTERVAL);
                     bouncer[2].update();
                 }
                 break;
             case 3:
                 time_pressed = millis();
                 break;
+
             case 53:
                 time_released = millis();
                 if (time_released - time_pressed < 500) {
@@ -105,26 +108,24 @@ void loop() {
                 break;
             case 4:
                 while (bouncer[4].read() == 0) {
-                    Mouse.move(-Mouse_Move_Distance, 0);
-                    delay(mouse_rebounce_interval);
+                    Mouse.move(-MOUSE_MOVE_DISTANCE, 0);
+                    delay(MOUSE_REBOUNCE_INTERVAL);
                     bouncer[4].update();
                 }
                 break;
             case 5:
                 time_pressed = millis();
-                button5_armed = true;
                 break;
             case 55:
                 time_released = millis();
-                button5_armed = false;
                 if (time_released - time_pressed < 300) {
                     Keyboard.press('V');
                 }
                 break;
             case 6:
                 while (bouncer[6].read() == 0) {
-                    Mouse.move(Mouse_Move_Distance, 0);
-                    delay(mouse_rebounce_interval);
+                    Mouse.move(MOUSE_MOVE_DISTANCE, 0);
+                    delay(MOUSE_REBOUNCE_INTERVAL);
                     bouncer[6].update();
                 }
                 break;
@@ -135,8 +136,8 @@ void loop() {
                 break;
             case 8:
                 while (bouncer[8].read() == 0) {
-                    Mouse.move(0, Mouse_Move_Distance);
-                    delay(mouse_rebounce_interval);
+                    Mouse.move(0, MOUSE_MOVE_DISTANCE);
+                    delay(MOUSE_REBOUNCE_INTERVAL);
                     bouncer[8].update();
                 }
                 break;
@@ -149,7 +150,7 @@ void loop() {
     } else {
         switch (button_pressed) {
             case 0:
-                Mouse_Active = true;
+                mouse_active = true;
                 break;
             case 1:
                 Keyboard.press(KEY_F5);
@@ -158,7 +159,7 @@ void loop() {
                 while (bouncer[2].read() == 0) {
                     Keyboard.press(KEY_UP_ARROW);
                     Keyboard.releaseAll();
-                    delay(keyboard_rebounce_interval);
+                    delay(KEYBOARD_REBOUNCE_INTERVAL);
                     bouncer[2].update();
                 }
                 break;
@@ -177,17 +178,15 @@ void loop() {
                 while (bouncer[4].read() == 0) {
                     Keyboard.press(KEY_LEFT_ARROW);
                     Keyboard.releaseAll();
-                    delay(keyboard_rebounce_interval);
+                    delay(KEYBOARD_REBOUNCE_INTERVAL);
                     bouncer[4].update();
                 }
                 break;
             case 5:
                 time_pressed = millis();
-                button5_armed = true;
                 break;
             case 55:
                 time_released = millis();
-                button5_armed = false;
                 if (time_released - time_pressed < 300) {
                     Keyboard.press('V');
                 }
@@ -196,7 +195,7 @@ void loop() {
                 while (bouncer[6].read() == 0) {
                     Keyboard.press(KEY_RIGHT_ARROW);
                     Keyboard.releaseAll();
-                    delay(keyboard_rebounce_interval);
+                    delay(KEYBOARD_REBOUNCE_INTERVAL);
                     bouncer[6].update();
                 }
                 break;
@@ -209,7 +208,7 @@ void loop() {
                 while (bouncer[8].read() == 0) {
                     Keyboard.press(KEY_DOWN_ARROW);
                     Keyboard.releaseAll();
-                    delay(keyboard_rebounce_interval);
+                    delay(KEYBOARD_REBOUNCE_INTERVAL);
                     bouncer[8].update();
                 }
                 break;
@@ -222,5 +221,4 @@ void loop() {
     }
 
     Keyboard.releaseAll();
-    button_pressed = 99;
 }
