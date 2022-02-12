@@ -93,7 +93,6 @@ void loop() {
             case 3:
                 time_pressed = millis();
                 break;
-
             case 53:
                 time_released = millis();
                 if (time_released - time_pressed < 500) {
