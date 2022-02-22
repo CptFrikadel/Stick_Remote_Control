@@ -18,7 +18,6 @@ uint8_t buttons[] = {9, 1, 2, 14, 5, 7, 3, 15, 4, 6}; //separate array from defi
 #define MOUSE_REBOUNCE_INTERVAL 4
 #define KEYBOARD_REBOUNCE_INTERVAL 200
 #define MOUSE_MOVE_DISTANCE  1
-//#define SUPPORT_MOUSE
 
 // I really don't see getting around doing this manually
 Bounce bouncer[] = { //would guess that's what the fuss is about
@@ -50,7 +49,7 @@ void setup() {
 unsigned button_pressed;
 long unsigned time_pressed;
 long unsigned time_released;
-#ifdef SUPPORT_MOUSE
+#ifdef SUPPORT_MOUSE_MODE
 bool mouse_active = false;
 #endif
 
@@ -78,7 +77,7 @@ void loop() {
         }
     }
 
-#ifdef SUPPORT_MOUSE
+#ifdef SUPPORT_MOUSE_MODE
     if (mouse_active) {
         switch (button_pressed) {
             case 0:
@@ -150,7 +149,7 @@ void loop() {
 #endif
         switch (button_pressed) {
             case 0:
-#ifdef SUPPORT_MOUSE
+#ifdef SUPPORT_MOUSE_MODE
                 mouse_active = true;
 #else
                 Keyboard.press('1');
@@ -222,7 +221,7 @@ void loop() {
             default:
                 break;
         }
-#ifdef SUPPORT_MOUSE
+#ifdef SUPPORT_MOUSE_MODE
     }
 #endif
     Keyboard.releaseAll();
