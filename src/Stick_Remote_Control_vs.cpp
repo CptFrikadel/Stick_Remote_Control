@@ -58,10 +58,24 @@ void loop() {
     button_pressed = 99;
 
     while (button_pressed == 99) {
-        if (last_button_pressed == 5 && millis() - time_pressed > 600) {
-            Keyboard.press('S');
-            Keyboard.releaseAll();
-            last_button_pressed = button_pressed;
+        switch (last_button_pressed) {
+            case 3:
+                if (millis() - time_pressed > 600) {
+                    Keyboard.press('M');
+                    Keyboard.releaseAll();
+                    last_button_pressed = button_pressed;
+                }
+                break;
+            case 5:
+                if (millis() - time_pressed > 600) {
+                    Keyboard.press('S');
+                    Keyboard.releaseAll();
+                    last_button_pressed = button_pressed;
+                }
+                break;
+            default:
+                break;
+
         }
         for (unsigned num = 0; num < NUMBUTTONS; num++) {
             if (bouncer[num].update()) {
@@ -147,80 +161,78 @@ void loop() {
         }
     } else {
 #endif
-        switch (button_pressed) {
-            case 0:
+    switch (button_pressed) {
+        case 0:
 #ifdef SUPPORT_MOUSE_MODE
-                mouse_active = true;
+            mouse_active = true;
 #else
-                Keyboard.press('1');
+            Keyboard.press('1');
 #endif
-                break;
-            case 1:
-                Keyboard.press(KEY_F5);
-                break;
-            case 2:
-                while (bouncer[2].read() == 0) {
-                    Keyboard.press(KEY_UP_ARROW);
-                    Keyboard.releaseAll();
-                    delay(KEYBOARD_REBOUNCE_INTERVAL);
-                    bouncer[2].update();
-                }
-                break;
-            case 3:
-                time_pressed = millis();
-                break;
-            case 53:
-                time_released = millis();
-                if (time_released - time_pressed < 500) {
-                    Keyboard.press(KEY_F1);
-                } else {
-                    Keyboard.press('M');
-                }
-                break;
-            case 4:
-                while (bouncer[4].read() == 0) {
-                    Keyboard.press(KEY_LEFT_ARROW);
-                    Keyboard.releaseAll();
-                    delay(KEYBOARD_REBOUNCE_INTERVAL);
-                    bouncer[4].update();
-                }
-                break;
-            case 5:
-                time_pressed = millis();
-                break;
-            case 55:
-                time_released = millis();
-                if (time_released - time_pressed < 300) {
-                    Keyboard.press('V');
-                }
-                break;
-            case 6:
-                while (bouncer[6].read() == 0) {
-                    Keyboard.press(KEY_RIGHT_ARROW);
-                    Keyboard.releaseAll();
-                    delay(KEYBOARD_REBOUNCE_INTERVAL);
-                    bouncer[6].update();
-                }
-                break;
-            case 7:
-                Keyboard.press(KEY_ESC);
+            break;
+        case 1:
+            Keyboard.press(KEY_F5);
+            break;
+        case 2:
+            while (bouncer[2].read() == 0) {
+                Keyboard.press(KEY_UP_ARROW);
                 Keyboard.releaseAll();
-                Keyboard.press(KEY_ESC);
-                break;
-            case 8:
-                while (bouncer[8].read() == 0) {
-                    Keyboard.press(KEY_DOWN_ARROW);
-                    Keyboard.releaseAll();
-                    delay(KEYBOARD_REBOUNCE_INTERVAL);
-                    bouncer[8].update();
-                }
-                break;
-            case 9:
-                Keyboard.press(KEY_RETURN);
-                break;
-            default:
-                break;
-        }
+                delay(KEYBOARD_REBOUNCE_INTERVAL);
+                bouncer[2].update();
+            }
+            break;
+        case 3:
+            time_pressed = millis();
+            break;
+        case 53:
+            time_released = millis();
+            if (time_released - time_pressed < 500) {
+                Keyboard.press(KEY_F1);
+            }
+            break;
+        case 4:
+            while (bouncer[4].read() == 0) {
+                Keyboard.press(KEY_LEFT_ARROW);
+                Keyboard.releaseAll();
+                delay(KEYBOARD_REBOUNCE_INTERVAL);
+                bouncer[4].update();
+            }
+            break;
+        case 5:
+            time_pressed = millis();
+            break;
+        case 55:
+            time_released = millis();
+            if (time_released - time_pressed < 300) {
+                Keyboard.press('V');
+            }
+            break;
+        case 6:
+            while (bouncer[6].read() == 0) {
+                Keyboard.press(KEY_RIGHT_ARROW);
+                Keyboard.releaseAll();
+                delay(KEYBOARD_REBOUNCE_INTERVAL);
+                bouncer[6].update();
+            }
+            break;
+        case 7:
+            Keyboard.press(KEY_ESC);
+            Keyboard.releaseAll();
+            Keyboard.press(KEY_ESC);
+            break;
+        case 8:
+            while (bouncer[8].read() == 0) {
+                Keyboard.press(KEY_DOWN_ARROW);
+                Keyboard.releaseAll();
+                delay(KEYBOARD_REBOUNCE_INTERVAL);
+                bouncer[8].update();
+            }
+            break;
+        case 9:
+            Keyboard.press(KEY_RETURN);
+            break;
+        default:
+            break;
+    }
 #ifdef SUPPORT_MOUSE_MODE
     }
 #endif
