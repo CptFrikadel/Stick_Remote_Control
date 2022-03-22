@@ -67,7 +67,7 @@ void loop() {
                 }
                 break;
             case 5:
-                if (millis() - time_pressed > 800) {
+                if (millis() - time_pressed >= 800) {
                     Keyboard.press('S');
                     Keyboard.releaseAll();
                     last_button_pressed = button_pressed;
@@ -202,7 +202,7 @@ void loop() {
             break;
         case 55:
             time_released = millis();
-            if (time_released - time_pressed > 200 && time_released - time_pressed < 500) {
+            if (time_released - time_pressed > 200 && time_released - time_pressed < 800) {
                 Keyboard.press('V');
             }
             break;
