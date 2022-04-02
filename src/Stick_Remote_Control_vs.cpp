@@ -34,9 +34,9 @@ Bounce bouncer[] = { //would guess that's what the fuss is about
 };
 
 void setup() {
-    for (unsigned set = 0; set < NUMBUTTONS; set++) { //sets the button pins
-        pinMode(buttons[set], INPUT);
-        digitalWrite(buttons[set], HIGH);  //<-comment out this line if not using internal pull-ups
+    for (auto button : buttons) { //sets the button pins
+        pinMode(button, INPUT);
+        digitalWrite(button, HIGH);  //<-comment out this line if not using internal pull-ups
     }//-----------------------------------and change read()==to high if your set up requires
     // pinMode(LED,OUTPUT);//------------------otherwise event will occur on release
 
