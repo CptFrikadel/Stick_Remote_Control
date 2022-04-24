@@ -16,7 +16,7 @@ uint8_t buttons[] = {9, 1, 2, 14, 5, 7, 3, 15, 4, 6}; //separate array from defi
 #define NUMBUTTONS sizeof(buttons)  //gives size of array *helps for adding buttons
 #define DEBOUNCE_DELAY 20           //Debounce delay in milliseconds
 #define MOUSE_REBOUNCE_INTERVAL 4
-#define KEYBOARD_REBOUNCE_INTERVAL 200
+#define KEYBOARD_REBOUNCE_INTERVAL 400
 #define MOUSE_MOVE_DISTANCE  1
 
 // I really don't see getting around doing this manually
