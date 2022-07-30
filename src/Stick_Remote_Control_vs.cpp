@@ -49,6 +49,7 @@ void setup() {
 unsigned button_pressed;
 long unsigned time_pressed;
 long unsigned time_released;
+bool speed = false;
 #ifdef SUPPORT_MOUSE_MODE
 bool mouse_active = false;
 #endif
@@ -69,6 +70,7 @@ void loop() {
             case 5:
                 if (millis() - time_pressed >= 800) {
                     Keyboard.press('S');
+                    speed = true;
                     Keyboard.releaseAll();
                     last_button_pressed = button_pressed;
                 }
@@ -166,7 +168,9 @@ void loop() {
 #ifdef SUPPORT_MOUSE_MODE
             mouse_active = true;
 #else
-            Keyboard.press('1');
+            //Keyboard.press('1');
+            Keyboard.press(speed ? 'V' : 'S');
+            speed = !speed;
 #endif
             break;
         case 1:
@@ -204,6 +208,7 @@ void loop() {
             time_released = millis();
             if (time_released - time_pressed > 200 && time_released - time_pressed < 800) {
                 Keyboard.press('V');
+                speed = false;
             }
             break;
         case 6:
