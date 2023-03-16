@@ -68,9 +68,9 @@ void loop() {
                 }
                 break;
             case 5:
-                if (millis() - time_pressed >= 800) {
-                    Keyboard.press('S');
-                    speed = true;
+                if (millis() - time_pressed >= 600) {
+                    Keyboard.press(speed ? 'V' : 'S');
+                    speed = !speed;
                     Keyboard.releaseAll();
                     last_button_pressed = button_pressed;
                 }
@@ -168,9 +168,7 @@ void loop() {
 #ifdef SUPPORT_MOUSE_MODE
             mouse_active = true;
 #else
-            //Keyboard.press('1');
-            Keyboard.press(speed ? 'V' : 'S');
-            speed = !speed;
+            Keyboard.press('1');
 #endif
             break;
         case 1:
@@ -203,13 +201,6 @@ void loop() {
             break;
         case 5:
             time_pressed = millis();
-            break;
-        case 55:
-            time_released = millis();
-            if (time_released - time_pressed > 200 && time_released - time_pressed < 800) {
-                Keyboard.press('V');
-                speed = false;
-            }
             break;
         case 6:
             while (bouncer[6].read() == 0) {
