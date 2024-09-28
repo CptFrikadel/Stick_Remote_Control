@@ -20,9 +20,14 @@ public:
 
     virtual Mode Update(Mode currentMode){ return currentMode; }
 
-    static constexpr unsigned long DebounceInterval = 20;
+    static constexpr unsigned long DebounceInterval = 10;
+    static constexpr unsigned long keyboard_initial_rebounce_interval = 600;
+    static constexpr unsigned long keyboard_rebounce_interval = 80;
+
 protected:
     Bounce mBouncer;
+
+    void PressKeyWithRebounce(unsigned key);
 };
 
 

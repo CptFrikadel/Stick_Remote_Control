@@ -1,4 +1,5 @@
 #include "Stick_Button.h"
+#include "Arduino.h"
 #include "Mouse.h"
 #include <Keyboard.h>
 
@@ -6,6 +7,33 @@
 #define RETURN_IF_NO_UPDATE if (mBouncer.update() != 1) return currentMode; \
     if (!mBouncer.fallingEdge()) return currentMode; \
 
+void StickButton::PressKeyWithRebounce(unsigned key)
+{
+    auto start = millis();
+
+    Keyboard.press(key);
+    Keyboard.releaseAll();
+
+    // Hold for initial delay
+    while (mBouncer.read() == 0){
+        if (millis() - start > keyboard_initial_rebounce_interval){
+            Keyboard.press(key);
+            Keyboard.releaseAll();
+            start = millis();
+            break;
+        }
+        mBouncer.update();
+    }
+
+   while (mBouncer.read() == 0) {
+       if (millis() - start > keyboard_rebounce_interval){
+           Keyboard.press(key);
+           Keyboard.releaseAll();
+           start = millis();
+       }
+       mBouncer.update();
+   }
+}
 
 void JoyStickDirectionButton::MoveMouse(int8_t x, int8_t y)
 {
@@ -21,6 +49,9 @@ Mode MenuButton::Update(Mode currentMode)
     RETURN_IF_NO_UPDATE;
 
     Keyboard.press(KEY_F5);
+
+    // TODO implement long press
+
     return currentMode;
 }
 
@@ -82,8 +113,7 @@ Mode JoystickRightButton::Update(Mode currentMode)
     
     switch (currentMode) {
         case Mode::Normal:
-            // TODO: Handle rebouncing
-            Keyboard.press(KEY_RIGHT_ARROW);
+            PressKeyWithRebounce(KEY_RIGHT_ARROW);
             break;
         case Mode::Mouse:
             MoveMouse(mouse_move_distance, 0);
@@ -99,8 +129,7 @@ Mode JoystickLeftButton::Update(Mode currentMode)
     
     switch (currentMode) {
         case Mode::Normal:
-            // TODO: Handle rebouncing
-            Keyboard.press(KEY_LEFT_ARROW);
+            PressKeyWithRebounce(KEY_LEFT_ARROW);
             break;
         case Mode::Mouse:
             MoveMouse(-mouse_move_distance, 0);
@@ -116,8 +145,7 @@ Mode JoystickUpButton::Update(Mode currentMode)
     
     switch (currentMode) {
         case Mode::Normal:
-            // TODO: Handle rebouncing
-            Keyboard.press(KEY_UP_ARROW);
+            PressKeyWithRebounce(KEY_UP_ARROW);
             break;
         case Mode::Mouse:
             MoveMouse(0, -mouse_move_distance);
@@ -133,8 +161,7 @@ Mode JoystickDownButton::Update(Mode currentMode)
     
     switch (currentMode) {
         case Mode::Normal:
-            // TODO: Handle rebouncing
-            Keyboard.press(KEY_DOWN_ARROW);
+            PressKeyWithRebounce(KEY_DOWN_ARROW);
             break;
         case Mode::Mouse:
             MoveMouse(0, mouse_move_distance);
