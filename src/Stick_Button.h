@@ -7,9 +7,9 @@
 enum class Mode {
     Normal,
     Mouse,
-    Shift,
 };
 
+static constexpr int mouse_move_distance = 1;
 
 class StickButton {
 
@@ -20,7 +20,7 @@ public:
 
     virtual Mode Update(Mode currentMode){ return currentMode; }
 
-    static unsigned long DebounceInterval;
+    static constexpr unsigned long DebounceInterval = 20;
 protected:
     Bounce mBouncer;
 };
@@ -76,26 +76,61 @@ public:
 };
 
 
-class JoystickDirectionButton : public StickButton {
+class JoyStickDirectionButton : public StickButton {
 public:
-    enum class Direction {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-    };
-
-    JoystickDirectionButton(uint8_t pinNumber, Direction direction)
+    JoyStickDirectionButton(uint8_t pinNumber)
         : StickButton(pinNumber)
-        , mDirection(direction)
+    {}
+
+    static constexpr int mouse_move_distance = 1;
+    static constexpr int mouse_rebounce_interval = 4;
+
+protected:
+    
+    void MoveMouse(int8_t x, int8_t y);
+};
+
+class JoystickLeftButton : public JoyStickDirectionButton {
+public:
+
+    JoystickLeftButton(uint8_t pinNumber)
+        : JoyStickDirectionButton(pinNumber)
     {}
 
     Mode Update(Mode currentMode) override;
-
-private:
-    Direction mDirection;
-
 };
 
+
+class JoystickRightButton : public JoyStickDirectionButton {
+public:
+
+    JoystickRightButton(uint8_t pinNumber)
+        : JoyStickDirectionButton(pinNumber)
+    {}
+
+    Mode Update(Mode currentMode) override;
+};
+
+
+class JoystickUpButton : public JoyStickDirectionButton {
+public:
+
+    JoystickUpButton(uint8_t pinNumber)
+        : JoyStickDirectionButton(pinNumber)
+    {}
+
+    Mode Update(Mode currentMode) override;
+};
+
+
+class JoystickDownButton : public JoyStickDirectionButton {
+public:
+
+    JoystickDownButton(uint8_t pinNumber)
+        : JoyStickDirectionButton(pinNumber)
+    {}
+
+    Mode Update(Mode currentMode) override;
+};
 
 #endif
