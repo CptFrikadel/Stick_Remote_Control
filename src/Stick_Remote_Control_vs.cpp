@@ -3,12 +3,31 @@
 #include <Keyboard.h>
 #include <Bounce.h>
 
-// Remote control for XCSoar, emulates a keyboard and mouse.
-// Hardware is just push buttons connected between pins of an Arduino Leonardo and Gnd
-// For each button press a keystroke or mouse action is sent.
-//
-// Button layout Stefly Remote as shown on http://www.openvario.org/doku.php?id=projects:remote_00:top
-// Additional Speed to Fly switch between Arduino pin 7 and GND
+/**
+ * Re-implementation of Remote control for XCSoar, emulates a keyboard and
+ * mouse. Hardware is just push buttons connected between pins of an Arduino
+ * Leonardo and Gnd For each button press a keystroke or mouse action is sent.
+ *
+ * Button layout Stefly Remote as shown on
+ * http://www.openvario.org/doku.php?id=projects:remote_00:top Additional Speed
+ * to Fly switch between Arduino pin 7 and GND
+ *
+ * This implementation uses the STF trigger switch as a 'Shift' key to trigger
+ * another layer. To use this layer, a custom event file is to be used. See
+ * src/Stick_Button.h for the keybindings.
+ *
+ * On the 'normal' layer, the remote works as normal (without STF). I.e:
+ *  - Pressing Menu opens the menu (F1), longpress opens the vario menu ('M')
+ *  - The Joystick operates the arrow keys, or the mouse depending on wether
+ * mouse mode is active
+ *
+ *  When the STF trigger is held, the 'Shift' layer is activated.
+ *  - Joystick Right/Left now Increases/Decreases Macready ('+' / '-')
+ *  - Joystick Up/Down now Increases/Decreases vario Volume ('0' / '9')
+ *  - The Menu key toggles between Vario and STF mode without requiring a
+ *    longpress ('V') / ('S')
+ *
+ */
 
 MenuButton menuButton(1);
 EscapeButton escapeButton(15);
