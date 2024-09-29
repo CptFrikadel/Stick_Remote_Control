@@ -7,6 +7,14 @@
 #define RETURN_IF_NO_UPDATE if (mBouncer.update() != 1) return currentMode; \
     if (!mBouncer.fallingEdge()) return currentMode; \
 
+
+enum class VarioMode {
+    Vario,
+    SpeedCommand,
+};
+
+static VarioMode varioMode = VarioMode::Vario;
+
 void StickButton::PressKeyWithRebounce(unsigned key)
 {
     auto start = millis();
@@ -56,9 +64,38 @@ Mode MenuButton::Update(Mode currentMode)
     if (!mBouncer.risingEdge()) return currentMode;
 
     if (millis() - mPressTime > menu_long_press_time) {
-        Keyboard.press(meny_key_long_press);
+        switch (currentMode){
+            case Mode::Normal:
+            case Mode::Mouse:
+                Keyboard.press(meny_key_long_press);
+                break;
+            case Mode::Shift:
+                if (varioMode == VarioMode::Vario) {
+                    varioMode = VarioMode::SpeedCommand;
+                    Keyboard.press(key_stf_mode);
+                } else {
+                    varioMode = VarioMode::Vario;
+                    Keyboard.press(key_vario_mode);
+                }
+                break;
+        }
     } else {
-        Keyboard.press(menu_key_press);
+        switch (currentMode) {
+        
+            case Mode::Normal:
+            case Mode::Mouse:
+                Keyboard.press(menu_key_press);
+                break;
+            case Mode::Shift:
+                if (varioMode == VarioMode::Vario) {
+                    varioMode = VarioMode::SpeedCommand;
+                    Keyboard.press(key_stf_mode);
+                } else {
+                    varioMode = VarioMode::Vario;
+                    Keyboard.press(key_vario_mode);
+                }
+                break;
+        }
     }
 
     return currentMode;
@@ -86,6 +123,9 @@ Mode FunctionButton::Update(Mode currentMode)
             return Mode::Mouse;
         case Mode::Mouse:
             return Mode::Normal;
+        case Mode::Shift:
+            Keyboard.press(key_volume_mute);
+            break;
     }
 
     return currentMode;
@@ -96,28 +136,9 @@ Mode STFButton::Update(Mode currentMode)
 {
     if (mBouncer.update() != 1) return currentMode;
 
-    if (mBouncer.fallingEdge()) {
-        mPressTime = millis(); 
-        return currentMode;
-    }
+    if (mBouncer.fallingEdge()) return Mode::Shift;
 
-    if (!mBouncer.risingEdge()) return currentMode;
-
-    if (millis() - mPressTime > stf_long_press_time) {
-        switch (mMode) {
-            case VarioMode::Vario:
-                Keyboard.press(key_stf_mode);
-                mMode = VarioMode::SpeedCommand;
-                break;
-            case VarioMode::SpeedCommand:
-                Keyboard.press(key_vario_mode);
-                mMode = VarioMode::Vario;
-                break;
-        }
-    } else {
-        Keyboard.press(key_vario_mode);
-        mMode = VarioMode::Vario;
-    }
+    if (mBouncer.risingEdge()) return Mode::Normal;
 
     return currentMode;
 }
@@ -134,6 +155,8 @@ Mode JoystickDepressButton::Update(Mode currentMode)
         case Mode::Mouse:
             Mouse.click(MOUSE_LEFT);
             break;
+        case Mode::Shift:
+            return currentMode;
     }
     return currentMode;
 }
@@ -149,6 +172,9 @@ Mode JoystickRightButton::Update(Mode currentMode)
             break;
         case Mode::Mouse:
             MoveMouse(mouse_move_distance, 0);
+            break;
+        case Mode::Shift:
+            PressKeyWithRebounce(key_macready_incr);
             break;
     }
     return currentMode;
@@ -166,6 +192,9 @@ Mode JoystickLeftButton::Update(Mode currentMode)
         case Mode::Mouse:
             MoveMouse(-mouse_move_distance, 0);
             break;
+        case Mode::Shift:
+            PressKeyWithRebounce(key_macready_decr);
+            break;
     }
     return currentMode;
 }
@@ -182,6 +211,9 @@ Mode JoystickUpButton::Update(Mode currentMode)
         case Mode::Mouse:
             MoveMouse(0, -mouse_move_distance);
             break;
+        case Mode::Shift:
+            PressKeyWithRebounce(key_volume_incr);
+            break;
     }
     return currentMode;
 }
@@ -197,6 +229,9 @@ Mode JoystickDownButton::Update(Mode currentMode)
             break;
         case Mode::Mouse:
             MoveMouse(0, mouse_move_distance);
+            break;
+        case Mode::Shift:
+            PressKeyWithRebounce(key_volume_decr);
             break;
     }
     return currentMode;

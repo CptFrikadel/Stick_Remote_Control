@@ -95,23 +95,11 @@ public:
 class STFButton : public StickButton {
 public:
 
-    enum class VarioMode {
-        Vario,
-        SpeedCommand,
-    };
-
     STFButton(uint8_t pinNumber)
         : StickButton(pinNumber)
     {}
 
     Mode Update(Mode currentMode) override;
-
-    static constexpr unsigned long stf_long_press_time = 600;
-
-private:
-    unsigned long mPressTime = 0;
-
-    VarioMode mMode = VarioMode::Vario;
 };
 
 
