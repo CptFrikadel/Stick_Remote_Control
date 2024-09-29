@@ -8,6 +8,7 @@
 enum class Mode {
     Normal,
     Mouse,
+    Shift,
 };
 
 static constexpr int mouse_move_distance = 1;
@@ -17,6 +18,12 @@ static constexpr uint8_t meny_key_long_press = 'M';
 static constexpr uint8_t esc_key_press = KEY_ESC;
 static constexpr uint8_t key_vario_mode = 'V';
 static constexpr uint8_t key_stf_mode = 'S';
+
+static constexpr uint8_t key_macready_incr = '+';
+static constexpr uint8_t key_macready_decr = '-';
+static constexpr uint8_t key_volume_incr = '0';
+static constexpr uint8_t key_volume_decr = '9';
+static constexpr uint8_t key_volume_mute = '8';
 
 
 class StickButton {
