@@ -15,6 +15,14 @@ enum class VarioMode {
 
 static VarioMode varioMode = VarioMode::Vario;
 
+
+void StickButton::Setup()
+{
+    pinMode(mPinNumber, INPUT);
+    // Enable pull-up
+    digitalWrite(mPinNumber, HIGH);
+}
+
 void StickButton::PressKeyWithRebounce(unsigned key)
 {
     auto start = millis();

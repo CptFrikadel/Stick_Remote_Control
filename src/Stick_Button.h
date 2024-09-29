@@ -30,16 +30,20 @@ class StickButton {
 
 public:
     StickButton(uint8_t pinNumber)
-        : mBouncer(pinNumber, DebounceInterval)
+        : mPinNumber(pinNumber)
+        , mBouncer(pinNumber, DebounceInterval)
     {}
 
     virtual Mode Update(Mode currentMode){ return currentMode; }
+
+    void Setup();
 
     static constexpr unsigned long DebounceInterval = 10;
     static constexpr unsigned long keyboard_initial_rebounce_interval = 600;
     static constexpr unsigned long keyboard_rebounce_interval = 80;
 
 protected:
+    uint8_t mPinNumber;
     Bounce mBouncer;
 
     void PressKeyWithRebounce(unsigned key);
