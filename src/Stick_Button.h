@@ -1,6 +1,7 @@
 #ifndef _STICK_BUTTON_H
 #define _STICK_BUTTON_H
 
+#include "Keyboard.h"
 #include <Bounce.h>
 #include <stdint.h>
 
@@ -10,6 +11,13 @@ enum class Mode {
 };
 
 static constexpr int mouse_move_distance = 1;
+
+static constexpr uint8_t menu_key_press = KEY_F1;
+static constexpr uint8_t meny_key_long_press = 'M';
+static constexpr uint8_t esc_key_press = KEY_ESC;
+static constexpr uint8_t key_vario_mode = 'V';
+static constexpr uint8_t key_stf_mode = 'S';
+
 
 class StickButton {
 
@@ -53,6 +61,7 @@ public:
     {}
 
     Mode Update(Mode currentMode) override;
+
 };
 
 

@@ -56,9 +56,9 @@ Mode MenuButton::Update(Mode currentMode)
     if (!mBouncer.risingEdge()) return currentMode;
 
     if (millis() - mPressTime > menu_long_press_time) {
-        Keyboard.press('M');
+        Keyboard.press(meny_key_long_press);
     } else {
-        Keyboard.press(KEY_F1);
+        Keyboard.press(menu_key_press);
     }
 
     return currentMode;
@@ -69,9 +69,9 @@ Mode EscapeButton::Update(Mode currentMode)
 {
     RETURN_IF_NO_UPDATE;
 
-    Keyboard.press(KEY_ESC);
+    Keyboard.press(esc_key_press);
     Keyboard.releaseAll();
-    Keyboard.press(KEY_ESC);
+    Keyboard.press(esc_key_press);
 
     return currentMode;
 }
@@ -106,16 +106,16 @@ Mode STFButton::Update(Mode currentMode)
     if (millis() - mPressTime > stf_long_press_time) {
         switch (mMode) {
             case VarioMode::Vario:
-                Keyboard.press('S');
+                Keyboard.press(key_stf_mode);
                 mMode = VarioMode::SpeedCommand;
                 break;
             case VarioMode::SpeedCommand:
-                Keyboard.press('V');
+                Keyboard.press(key_vario_mode);
                 mMode = VarioMode::Vario;
                 break;
         }
     } else {
-        Keyboard.press('V');
+        Keyboard.press(key_vario_mode);
         mMode = VarioMode::Vario;
     }
 
