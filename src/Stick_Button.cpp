@@ -48,9 +48,9 @@ Mode MenuButton::Update(Mode currentMode)
 {
     RETURN_IF_NO_UPDATE;
 
-    Keyboard.press(KEY_F5);
+    Keyboard.press(KEY_F1);
 
-    // TODO implement long press
+    // TODO implement long press: Press 'M'
 
     return currentMode;
 }
@@ -85,8 +85,32 @@ Mode FunctionButton::Update(Mode currentMode)
 
 Mode STFButton::Update(Mode currentMode)
 {
-    RETURN_IF_NO_UPDATE;
-    // TODO
+    if (mBouncer.update() != 1) return currentMode;
+
+    if (mBouncer.fallingEdge()) {
+        mPressTime = millis(); 
+        return currentMode;
+    }
+
+    if (mBouncer.risingEdge()) {
+
+        if (millis() - mPressTime > stf_long_press_time) {
+            switch (mMode) {
+                case VarioMode::Vario:
+                    Keyboard.press('S');
+                    mMode = VarioMode::SpeedCommand;
+                    break;
+                case VarioMode::SpeedCommand:
+                    Keyboard.press('V');
+                    mMode = VarioMode::Vario;
+                    break;
+            }
+        } else {
+            Keyboard.press('V');
+            mMode = VarioMode::Vario;
+        }
+    }
+
     return currentMode;
 }
 
