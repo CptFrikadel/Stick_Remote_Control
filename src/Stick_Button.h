@@ -38,6 +38,11 @@ public:
     {}
 
     Mode Update(Mode currentMode) override;
+
+    static constexpr unsigned long menu_long_press_time = 600;
+
+private:
+    unsigned long mPressTime = 0;
 };
 
 

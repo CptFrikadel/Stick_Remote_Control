@@ -46,11 +46,20 @@ void JoyStickDirectionButton::MoveMouse(int8_t x, int8_t y)
 
 Mode MenuButton::Update(Mode currentMode)
 {
-    RETURN_IF_NO_UPDATE;
+    if (mBouncer.update() != 1) return currentMode;
 
-    Keyboard.press(KEY_F1);
+    if (mBouncer.fallingEdge()) {
+        mPressTime = millis(); 
+        return currentMode;
+    }
 
-    // TODO implement long press: Press 'M'
+    if (!mBouncer.risingEdge()) return currentMode;
+
+    if (millis() - mPressTime > menu_long_press_time) {
+        Keyboard.press('M');
+    } else {
+        Keyboard.press(KEY_F1);
+    }
 
     return currentMode;
 }
@@ -92,23 +101,22 @@ Mode STFButton::Update(Mode currentMode)
         return currentMode;
     }
 
-    if (mBouncer.risingEdge()) {
+    if (!mBouncer.risingEdge()) return currentMode;
 
-        if (millis() - mPressTime > stf_long_press_time) {
-            switch (mMode) {
-                case VarioMode::Vario:
-                    Keyboard.press('S');
-                    mMode = VarioMode::SpeedCommand;
-                    break;
-                case VarioMode::SpeedCommand:
-                    Keyboard.press('V');
-                    mMode = VarioMode::Vario;
-                    break;
-            }
-        } else {
-            Keyboard.press('V');
-            mMode = VarioMode::Vario;
+    if (millis() - mPressTime > stf_long_press_time) {
+        switch (mMode) {
+            case VarioMode::Vario:
+                Keyboard.press('S');
+                mMode = VarioMode::SpeedCommand;
+                break;
+            case VarioMode::SpeedCommand:
+                Keyboard.press('V');
+                mMode = VarioMode::Vario;
+                break;
         }
+    } else {
+        Keyboard.press('V');
+        mMode = VarioMode::Vario;
     }
 
     return currentMode;
